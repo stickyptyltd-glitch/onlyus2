@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Only Us Two — console</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3ECDD; --surface:#FBF6EA; --surface-2:#F0E6D2; --text:#241A2E; --text-muted:#6E6076;
+    --accent:#B34A2A; --accent-ink:#FBF6EA; --border:rgba(36,26,46,0.14); --danger:#A83232; --ok:#4C7A4C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#16121F; --surface:#221B31; --surface-2:#2A2140; --text:#F4EFFB; --text-muted:#A79BC0;
+      --accent:#DD724A; --accent-ink:#1B1424; --border:rgba(244,239,251,0.14); --danger:#E28080; --ok:#7FBE7F;
+    }
+  }
+  *{ box-sizing:border-box; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter', system-ui, sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  h1,h2{ font-family:'Newsreader', Georgia, serif; font-weight:600; margin:0; }
+  .wrap{ max-width:480px; margin:0 auto; padding:30px 20px 60px; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  label{ display:block; font-size:13px; color:var(--text-muted); margin:16px 0 6px; }
+  input[type=text], input[type=password], textarea{
+    width:100%; background:var(--surface); border:1px solid var(--border); border-radius:9px;
+    padding:11px 12px; font-size:14.5px; color:var(--text); font-family:'Inter', sans-serif; outline:none;
+  }
+  textarea{ min-height:80px; resize:vertical; }
+  input[type=file]{ width:100%; font-size:13px; }
+  button{ font-family:'Inter', sans-serif; cursor:pointer; }
+  .primary{ width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:10px; padding:13px; font-size:14.5px; font-weight:600; margin-top:18px; }
+  .secondary{ width:100%; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:10px; padding:11px; font-size:13.5px; margin-top:10px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:16px; }
+  .stat-row{ display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-top:1px solid var(--border); }
+  .stat-row:first-child{ border-top:none; }
+  .stat-num{ font-family:'IBM Plex Mono', monospace; font-size:18px; }
+  .note{ font-size:12px; color:var(--text-muted); line-height:1.5; margin-top:12px; }
+  .toggle-row{ display:flex; align-items:center; gap:10px; margin-top:16px; }
+  .toggle-row input{ width:20px; height:20px; }
+  .radio-row{ display:flex; gap:14px; margin-top:8px; font-size:14px; }
+  .err{ color:var(--danger); font-size:13px; margin-top:10px; }
+  .ok-msg{ color:var(--ok); font-size:13px; margin-top:10px; }
+  .section-label{ font-size:12.5px; color:var(--text-muted); margin:22px 0 4px; text-transform:uppercase; letter-spacing:0.05em; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+  // Point this at your deployed Worker.
+  const API_BASE = 'https://onlyus2-api.lecheyne24.workers.dev';
+  const KEY_STORAGE = 'ou2_admin_key'; // sessionStorage only — cleared when the tab closes
+
+  const app = document.getElementById('app');
+
+  function renderLogin(){
+    app.innerHTML = `
+      <h1>Admin</h1>
+      <p style="color:var(--text-muted); font-size:13.5px; margin-top:8px;">Enter the admin key you set as this Worker's ADMIN_KEY secret.</p>
+      <label>Admin key</label>
+      <input type="password" id="keyInput">
+      <button class="primary" id="loginBtn">Continue</button>
+      <div id="loginErr"></div>
+    `;
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const key = document.getElementById('keyInput').value.trim();
+      if (!key) return;
+      const res = await fetch(API_BASE + '/admin/stats', { headers: { 'X-Admin-Key': key } });
+      if (res.status === 401){
+        document.getElementById('loginErr').innerHTML = '<p class="err">Wrong key.</p>';
+        return;
+      }
+      if (!res.ok){
+        document.getElementById('loginErr').innerHTML = '<p class="err">Could not reach the backend — check API_BASE at the top of this file.</p>';
+        return;
+      }
+      sessionStorage.setItem(KEY_STORAGE, key);
+      renderDashboard(key);
+    });
+  }
+
+  async function renderDashboard(key){
+    app.innerHTML = `<p class="mono" style="color:var(--text-muted);">Loading…</p>`;
+    const headers = { 'X-Admin-Key': key };
+    const [statsRes, cfgRes] = await Promise.all([
+      fetch(API_BASE + '/admin/stats', { headers }),
+      fetch(API_BASE + '/admin/config', { headers }),
+    ]);
+    if (statsRes.status === 401 || cfgRes.status === 401){
+      sessionStorage.removeItem(KEY_STORAGE);
+      renderLogin();
+      return;
+    }
+    const stats = await statsRes.json();
+    const cfg = await cfgRes.json();
+
+    app.innerHTML = `
+      <h1>Admin</h1>
+
+      <div class="section-label">Stats</div>
+      <div class="card">
+        <div class="stat-row"><span>Active pairings</span><span class="stat-num">${stats.roomCount}</span></div>
+        <div class="stat-row"><span>Total messages stored</span><span class="stat-num">${stats.messageCount}</span></div>
+        <p class="note">${stats.note || ''}</p>
+        <p class="note">These counts cost nothing to check (read-only). Daily write/read totals against the free-tier cap live in Cloudflare's own dashboard — Worker or KV namespace → Metrics tab — not duplicated here on purpose, since tracking it here would itself cost extra writes against that same cap.</p>
+      </div>
+
+      <div class="section-label">Landing page headline</div>
+      <div class="card">
+        <label>Headline</label>
+        <input type="text" id="headlineInput" value="${(cfg.headline || '').replace(/"/g,'&quot;')}" placeholder="Leave blank to use the built-in default">
+        <label>Subheadline</label>
+        <input type="text" id="subheadlineInput" value="${(cfg.subheadline || '').replace(/"/g,'&quot;')}" placeholder="Leave blank to use the built-in default">
+        <p class="note">Changes here update the live landing page immediately — no redeploy, no touching any files. Leave either blank to fall back to what's already written into the page.</p>
+      </div>
+
+      <div class="section-label">Landing page banner</div>
+      <div class="card">
+        <div class="toggle-row">
+          <input type="checkbox" id="bannerEnabled" ${cfg.bannerEnabled ? 'checked' : ''}>
+          <label style="margin:0;">Show a banner on the landing page</label>
+        </div>
+
+        <label>Banner type</label>
+        <div class="radio-row">
+          <label style="margin:0; display:flex; align-items:center; gap:6px;"><input type="radio" name="bannerType" value="founding" ${cfg.bannerType !== 'sponsor' ? 'checked' : ''}> Founding supporters</label>
+          <label style="margin:0; display:flex; align-items:center; gap:6px;"><input type="radio" name="bannerType" value="sponsor" ${cfg.bannerType === 'sponsor' ? 'checked' : ''}> Paid sponsor</label>
+        </div>
+
+        <label>Founding supporter names (one per line)</label>
+        <textarea id="founding">${(cfg.foundingSupporters || []).join('\n')}</textarea>
+
+        <label>Sponsor name</label>
+        <input type="text" id="sponsorName" value="${(cfg.sponsorName || '').replace(/"/g,'&quot;')}">
+        <label>Sponsor tagline</label>
+        <input type="text" id="sponsorTagline" value="${(cfg.sponsorTagline || '').replace(/"/g,'&quot;')}">
+        <label>Sponsor link URL</label>
+        <input type="text" id="sponsorUrl" value="${(cfg.sponsorUrl || '').replace(/"/g,'&quot;')}">
+        <label>Sponsor banner image (optional — replaces the text card with an image)</label>
+        <input type="file" id="bannerImage" accept="image/*">
+        <p class="note" id="imgStatus">${cfg.bannerImageDataUri ? 'An image is currently set.' : 'No image set — using the text card.'}</p>
+        <button class="secondary" id="clearImageBtn" type="button">Clear image</button>
+
+        <button class="primary" id="saveBtn">Save changes</button>
+        <div id="saveMsg"></div>
+      </div>
+
+      <button class="secondary" id="logoutBtn">Log out</button>
+    `;
+
+    let pendingImageDataUri = cfg.bannerImageDataUri || '';
+
+    document.getElementById('bannerImage').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 300000){
+        document.getElementById('imgStatus').innerHTML = '<span class="err">That image is too large — keep it under ~300KB so the landing page stays fast.</span>';
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingImageDataUri = reader.result;
+        document.getElementById('imgStatus').textContent = 'New image ready — click Save to apply.';
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('clearImageBtn').addEventListener('click', () => {
+      pendingImageDataUri = '';
+      document.getElementById('imgStatus').textContent = 'Image will be cleared on save.';
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const body = {
+        headline: document.getElementById('headlineInput').value.trim(),
+        subheadline: document.getElementById('subheadlineInput').value.trim(),
+        bannerEnabled: document.getElementById('bannerEnabled').checked,
+        bannerType: document.querySelector('input[name=bannerType]:checked').value,
+        foundingSupporters: document.getElementById('founding').value.split('\n').map(s => s.trim()).filter(Boolean),
+        sponsorName: document.getElementById('sponsorName').value.trim(),
+        sponsorTagline: document.getElementById('sponsorTagline').value.trim(),
+        sponsorUrl: document.getElementById('sponsorUrl').value.trim() || '#',
+        bannerImageDataUri: pendingImageDataUri,
+      };
+      const res = await fetch(API_BASE + '/admin/config', {
+        method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      document.getElementById('saveMsg').innerHTML = res.ok
+        ? '<p class="ok-msg">Saved — live on the landing page now.</p>'
+        : '<p class="err">Save failed — try again.</p>';
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem(KEY_STORAGE);
+      renderLogin();
+    });
+  }
+
+  const cachedKey = sessionStorage.getItem(KEY_STORAGE);
+  if (cachedKey) renderDashboard(cachedKey);
+  else renderLogin();
+</script>
+</body>
+</html>
