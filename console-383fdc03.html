@@ -69,7 +69,16 @@
     document.getElementById('loginBtn').addEventListener('click', async () => {
       const key = document.getElementById('keyInput').value.trim();
       if (!key) return;
-      const res = await fetch(API_BASE + '/admin/stats', { headers: { 'X-Admin-Key': key } });
+      document.getElementById('loginErr').innerHTML = '';
+      let res;
+      try {
+        res = await fetch(API_BASE + '/admin/stats', { headers: { 'X-Admin-Key': key } });
+      } catch (err) {
+        document.getElementById('loginErr').innerHTML =
+          '<p class="err">Request failed before reaching the server (likely CORS — this page must be loaded from exactly '
+          + location.origin + ' matching the Worker’s ALLOWED_ORIGIN). Details: ' + String(err) + '</p>';
+        return;
+      }
       if (res.status === 401){
         document.getElementById('loginErr').innerHTML = '<p class="err">Wrong key.</p>';
         return;
