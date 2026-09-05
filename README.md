@@ -63,7 +63,8 @@ Trade-off, stated plainly: this makes the file meaningfully larger (~440KB vs. ~
 
 ## Known limitations
 
-- **The encryption has not had external/independent review.** It's a standard-looking construction (ECDH P-256 pairing, HKDF, a ratcheting HMAC chain deriving a fresh AES-GCM key per message) built and reviewed only by whoever's worked on this code — that is not the same thing as a security audit. Treat it accordingly until it's had real outside scrutiny.
+- **The encryption has not had external/independent review.** This is the top outstanding item. It's a standard-looking construction (ECDH P-256 pairing, HKDF, a ratcheting HMAC chain deriving a fresh AES-GCM key per message) built and reviewed only by whoever's worked on this code — that is not the same thing as a security audit. Treat it accordingly until it's had real outside scrutiny.
+- **Joining a room isn't perfectly atomic.** Cloudflare KV has no atomic read-modify-write, so a join reads the room, checks it's still open, then writes — there's a small theoretical race if two people hit the exact same join link in the exact same instant. Deliberately left as-is rather than patched with an untested fix: for a two-person pairing tool this is a low-probability edge case, and a "clever" concurrency fix shipped without a way to actually test it under race conditions would risk being worse than the documented limitation. See the comment above the relevant code in `onlyus2-api`'s `worker.js` for the exact mechanics.
 
 ## Contact email
 
