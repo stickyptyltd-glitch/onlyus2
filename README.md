@@ -57,9 +57,9 @@ Affiliate programs need something to track a referral to — a signup, an accoun
 
 ## Self-hosted fonts and QR libraries
 
-`app.html` no longer loads anything from Google Fonts or cdnjs — every font and both QR libraries are embedded directly in the file (fonts as base64 data URIs via `@font-face`, the libraries inlined as plain `<script>` tags). This closes a real gap: those third parties previously learned "someone opened this page, right now" on every single visit, independent of anything the app itself does or doesn't log.
+Every page (`index.html`, `app.html`, `console-383fdc03.html`, `privacy.html`, `terms.html`) loads nothing from Google Fonts or cdnjs — every font is embedded directly as base64 data URIs via `@font-face`, and `app.html`'s two QR libraries are inlined as plain `<script>` tags. This closes a real gap: those third parties previously learned "someone opened this page, right now" on every single visit, independent of anything the app itself does or doesn't log. `index.html`, `privacy.html`, `terms.html`, and `console-383fdc03.html` still loaded Google Fonts externally for a while after `app.html` was fixed - fixed for all of them now, and the CSP's `style-src`/`font-src` no longer need to allow `fonts.googleapis.com`/`fonts.gstatic.com` at all.
 
-Trade-off, stated plainly: this makes the file meaningfully larger (~440KB vs. ~140KB before) — a one-time load cost, not a per-message one, and a fair trade for what it removes.
+Trade-off, stated plainly: this makes each file meaningfully larger (an extra ~265KB of embedded font data per page) — a one-time load cost, not a per-message one, and a fair trade for what it removes.
 
 ## Known limitations
 
