@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — Only Us Two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16121F; --bg-alt: #1F1A2B; --border: #544870;
+    --text-primary: #C9C4D4; --text-muted: #8A8296; --text-dim: #8E7F97;
+    --accent: #A87A67; --accent-dim: #5A5266; --accent-ink: #16121F;
+    --danger: #B0776D; --ok: #6E8F6E;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text-primary); font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,h2{ font-family:'Newsreader', Georgia, serif; font-weight:500; letter-spacing:-0.01em; margin:0; }
+  a{ color:var(--accent); }
+  .wrap{ max-width:640px; margin:0 auto; padding:50px 22px 60px; }
+  h1{ font-size:32px; margin-bottom:8px; }
+  .updated{ font-size:13px; color:var(--text-dim); margin-bottom:36px; }
+  h2{ font-size:19px; margin:32px 0 10px; }
+  p, li{ font-size:15px; line-height:1.65; color:var(--text-muted); }
+  ul{ padding-left:20px; margin:10px 0; }
+  .placeholder{ background:var(--bg-alt); border:1px dashed var(--border); border-radius:10px; padding:14px 16px; font-size:13.5px; color:var(--text-dim); margin-top:32px; }
+  .back{ display:inline-block; margin-top:36px; font-size:13.5px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Privacy</h1>
+  <p class="updated">Last updated 2026-09-05</p>
+
+  <p>The short version: this app is built so there's very little to have a policy about. No accounts, no names, no emails, no phone numbers, at any point.</p>
+
+  <h2>What we don't collect</h2>
+  <ul>
+    <li>No account, sign-up, name, email address, or phone number — nothing identifies you.</li>
+    <li>No analytics, no ad networks, no tracking scripts, no affiliate links.</li>
+    <li>No cookies used for tracking (any browser storage used is described below, and stays on your device).</li>
+  </ul>
+
+  <h2>What is technically stored, and by whom</h2>
+  <p>Messages are encrypted on your device before they're ever sent. The server (a Cloudflare Worker, storing data in Cloudflare KV) only ever holds encrypted blobs it cannot read — the decryption key never leaves your device. Messages auto-expire from storage over time (matched to your own disappearing-messages setting if you set one, or after 90 days by default otherwise).</p>
+  <p>What the server operator <em>can</em> technically observe, since a message has to reach the server to be relayed: roughly when a message was sent and its approximate size (content is padded to reduce how precisely size reveals anything). Never what's inside it.</p>
+
+  <h2>What your hosting provider can see, separate from what we log</h2>
+  <p>This site is served through Cloudflare. Like any website behind any hosting or CDN provider, Cloudflare's own infrastructure sees the IP address of every request as a basic function of how the internet routes traffic — this isn't something this app's own code logs, stores, or has access to, but it's a real, honest limitation worth stating plainly rather than leaving out. See Cloudflare's own privacy policy for how they handle that at the infrastructure level.</p>
+
+  <h2>What's stored in your browser</h2>
+  <p>Encryption keys and pairing state are kept in your browser's local storage, on your device only. Clearing your browser's site data removes it. Nothing here is sent anywhere in a form we can read.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes, the date at the top of this page will change with it.</p>
+
+  <div class="placeholder">
+    <strong>Placeholder — not legal advice:</strong> this page describes, factually, what the app does and doesn't do technically. It does not cover jurisdiction-specific legal requirements (e.g. GDPR/CCPA-style notices, a designated contact for data requests, or requirements specific to where you or your users are located). Have an actual lawyer review this before relying on it as a complete legal document.
+  </div>
+
+  <a class="back" href="index.html">&larr; Back to Only Us Two</a>
+</div>
+</body>
+</html>
