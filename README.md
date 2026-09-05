@@ -2,6 +2,8 @@
 
 A browser-based, link-paired, end-to-end encrypted anonymous messenger, plus a landing page and a small admin dashboard for the banner/stats.
 
+Licensed under [PolyForm Noncommercial 1.0.0](LICENSE) — free to view, use, and modify for any noncommercial purpose; commercial use requires the licensor's permission.
+
 ## Files
 
 - **`index.html`** — the landing page.
