@@ -8,6 +8,17 @@ A browser-based, link-paired, end-to-end encrypted anonymous messenger, plus a l
 - **`app.html`** — the actual app.
 - **`console-383fdc03.html`** — passcode-protected dashboard: toggle the landing page banner, edit founding-supporter names or sponsor info, check room/message counts. Not linked from anywhere public — access it directly at your-domain/console-383fdc03.html.
 
+## Self-hosting this from scratch
+
+1. **Fork/clone both repos**: this one (`onlyus2`, the frontend) and `onlyus2-api` (the Worker backend).
+2. **Cloudflare Pages**: create a new Pages project, connect it to your fork of this repo, branch `main`, no build command needed (it's static HTML) — it deploys automatically on every push after that.
+3. **Cloudflare Worker**: create a Worker named however you like, paste `worker.js`'s contents into its Edit Code screen, Deploy. (Note: pushing to the `onlyus2-api` repo does **not** auto-deploy the Worker unless you separately set up Cloudflare's Git-connect import for Workers — the manual paste-and-deploy path above always works regardless.)
+4. **KV namespace**: create one in the Cloudflare dashboard, then bind it to the Worker as `OU2_KV` (Worker → Settings → Variables → KV Namespace Bindings).
+5. **`ADMIN_KEY` secret**: see the next section below.
+6. **Point the frontend at your Worker**: `index.html`, `app.html`, and `console-383fdc03.html` each have an `API_BASE` constant near the top of their `<script>` — set all three to your Worker's URL (`https://your-worker-name.your-subdomain.workers.dev`).
+7. **Lock CORS to your domain**: `worker.js` has an `ALLOWED_ORIGIN` constant — set it to your actual domain (e.g. `https://yourdomain.com`), not `*`, before going live.
+8. **Custom domain** (optional but recommended): attach your own domain to the Pages project in Cloudflare, rather than using the `pages.dev` subdomain, for a cleaner share experience.
+
 ## One-time backend setup for the admin/banner features
 
 In the Cloudflare dashboard, on the `onlyus2-api` Worker:
@@ -47,6 +58,10 @@ Affiliate programs need something to track a referral to — a signup, an accoun
 `app.html` no longer loads anything from Google Fonts or cdnjs — every font and both QR libraries are embedded directly in the file (fonts as base64 data URIs via `@font-face`, the libraries inlined as plain `<script>` tags). This closes a real gap: those third parties previously learned "someone opened this page, right now" on every single visit, independent of anything the app itself does or doesn't log.
 
 Trade-off, stated plainly: this makes the file meaningfully larger (~440KB vs. ~140KB before) — a one-time load cost, not a per-message one, and a fair trade for what it removes.
+
+## Known limitations
+
+- **The encryption has not had external/independent review.** It's a standard-looking construction (ECDH P-256 pairing, HKDF, a ratcheting HMAC chain deriving a fresh AES-GCM key per message) built and reviewed only by whoever's worked on this code — that is not the same thing as a security audit. Treat it accordingly until it's had real outside scrutiny.
 
 ## Contact email
 
