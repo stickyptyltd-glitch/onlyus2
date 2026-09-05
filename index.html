@@ -10,26 +10,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #F3ECDD;
-    --surface: #FBF6EA;
-    --surface-2: #F0E6D2;
-    --text: #241A2E;
-    --text-muted: #6E6076;
-    --accent: #B34A2A;
-    --accent-ink: #FBF6EA;
-    --accent-2: #6C55C2;
-    --border: rgba(36,26,46,0.14);
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg: #16121F; --surface: #221B31; --surface-2: #2A2140;
-      --text: #F4EFFB; --text-muted: #A79BC0; --accent: #DD724A;
-      --accent-ink: #1B1424; --accent-2: #A292F2; --border: rgba(244,239,251,0.14);
-    }
+    --bg: #16121F;
+    --bg-alt: #1F1A2B;
+    --border: #544870;
+    --text-primary: #C9C4D4;
+    --text-muted: #8A8296;
+    --text-dim: #8E7F97;
+    --accent: #A87A67;
+    --accent-dim: #5A5266;
+    --accent-ink: #16121F;
+    --danger: #B0776D;
+    --ok: #6E8F6E;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
-  body{ background:var(--bg); color:var(--text); font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  body{ background:var(--bg); color:var(--text-primary); font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
   h1,h2,h3{ font-family:'Newsreader', Georgia, serif; font-weight:500; letter-spacing:-0.01em; margin:0; }
   .mono{ font-family:'IBM Plex Mono', monospace; }
   a{ color:inherit; }
@@ -47,13 +42,19 @@
   .cta-primary{ display:inline-block; background:var(--accent); color:var(--accent-ink); text-decoration:none; font-size:16px; font-weight:600; padding:15px 30px; border-radius:11px; }
   .cta-note{ font-size:13px; color:var(--text-muted); margin-top:14px; }
 
+  /* Muted on purpose — a countdown is information, not a promo banner. */
+  .countdown{ display:flex; justify-content:center; gap:18px; margin-top:22px; }
+  .countdown-unit{ text-align:center; }
+  .countdown-num{ font-family:'IBM Plex Mono', monospace; font-size:19px; color:var(--text-muted); line-height:1; }
+  .countdown-label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+
   /* ---------- the fork: two paths, presented as a choice, not a sequence ---------- */
   .fork{ padding:8px 0 60px; }
   .fork h2{ font-size:23px; text-align:center; max-width:400px; margin:0 auto 8px; }
   .fork .fork-sub{ text-align:center; color:var(--text-muted); font-size:14.5px; max-width:400px; margin:0 auto 34px; }
   .fork-grid{ display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--border); border-radius:16px; overflow:hidden; }
   @media (max-width:520px){ .fork-grid{ grid-template-columns:1fr; } }
-  .fork-panel{ background:var(--surface); padding:28px 24px; }
+  .fork-panel{ background:var(--bg-alt); padding:28px 24px; }
   .fork-panel h3{ font-size:19px; margin-bottom:10px; }
   .fork-panel p{ font-size:14px; line-height:1.6; color:var(--text-muted); }
 
@@ -70,22 +71,22 @@
   .support h2{ font-size:23px; text-align:center; margin-bottom:10px; }
   .support .support-sub{ text-align:center; color:var(--text-muted); font-size:14.5px; max-width:420px; margin:0 auto 30px; }
   .support-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
-  .donate-btn{ display:inline-block; background:var(--surface); border:1px solid var(--border); color:var(--text); text-decoration:none; font-size:14.5px; font-weight:600; padding:13px 22px; border-radius:10px; }
-  .sponsor-card{ display:block; background:var(--surface); border:1px dashed var(--border); border-radius:12px; padding:13px 15px; text-decoration:none; color:inherit; max-width:340px; margin:0 auto; }
+  .donate-btn{ display:inline-block; background:var(--bg-alt); border:1px solid var(--border); color:var(--text-primary); text-decoration:none; font-size:14.5px; font-weight:600; padding:13px 22px; border-radius:10px; }
+  .sponsor-card{ display:block; background:var(--bg-alt); border:1px dashed var(--border); border-radius:12px; padding:13px 15px; text-decoration:none; color:inherit; max-width:340px; margin:0 auto; }
   .sponsor-label{ display:block; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; }
   .sponsor-name{ display:block; font-size:14px; font-weight:600; }
   .sponsor-tagline{ display:block; font-size:12.5px; color:var(--text-muted); margin-top:3px; line-height:1.4; }
-  .founding-banner{ background:var(--surface); border:1px dashed var(--border); border-radius:12px; padding:16px 18px; max-width:340px; margin:0 auto; text-align:center; }
+  .founding-banner{ background:var(--bg-alt); border:1px dashed var(--border); border-radius:12px; padding:16px 18px; max-width:340px; margin:0 auto; text-align:center; }
   .founding-list{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-top:10px; }
-  .founding-list span{ background:var(--surface-2); border-radius:20px; padding:5px 12px; font-size:12.5px; }
+  .founding-list span{ background:var(--border); border-radius:20px; padding:5px 12px; font-size:12.5px; }
   .sponsor-image-banner{ padding:0; overflow:hidden; max-width:340px; margin:0 auto; }
   .sponsor-image-banner img{ display:block; width:100%; height:auto; border-radius:11px; }
 
   /* ---------- footer ---------- */
   footer{ border-top:1px solid var(--border); padding:26px 0 40px; }
-  .footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:12.5px; color:var(--text-muted); }
-  .footer-row a{ text-decoration:none; color:var(--text-muted); }
-  .footer-row a:hover{ color:var(--text); }
+  .footer-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:12.5px; color:var(--text-dim); }
+  .footer-row a{ text-decoration:none; color:var(--text-dim); }
+  .footer-row a:hover{ color:var(--text-primary); }
 </style>
 </head>
 <body>
@@ -102,6 +103,12 @@
     <p class="sub" id="heroSub">Only Us Two pairs exactly two people — in person with a scanned code, or remotely with a link — and encrypts every message with a key that's used once and thrown away. No accounts. No names.</p>
     <a class="cta-primary" href="./app.html">Open Only Us Two</a>
     <p class="cta-note">Free. Runs entirely in your browser — nothing to install.</p>
+    <div class="countdown" id="launchCountdown" style="display:none;">
+      <div class="countdown-unit"><span class="countdown-num" id="cdDays">00</span><span class="countdown-label">days</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="cdHours">00</span><span class="countdown-label">hrs</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="cdMins">00</span><span class="countdown-label">min</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="cdSecs">00</span><span class="countdown-label">sec</span></div>
+    </div>
   </section>
 
   <section class="fork">
@@ -164,6 +171,34 @@
   document.getElementById('donateLink').href = DONATE_URL;
   document.getElementById('sourceLink').href = SOURCE_URL;
 
+  // Stays hidden if launchDate is missing, blank, invalid, or already past —
+  // never shows a broken "0 days left."
+  function initCountdown(launchDateStr) {
+    if (!launchDateStr) return;
+    const target = new Date(launchDateStr);
+    if (isNaN(target.getTime()) || target.getTime() <= Date.now()) return;
+
+    const el = document.getElementById('launchCountdown');
+    const dEl = document.getElementById('cdDays');
+    const hEl = document.getElementById('cdHours');
+    const mEl = document.getElementById('cdMins');
+    const sEl = document.getElementById('cdSecs');
+    const pad = n => String(n).padStart(2, '0');
+
+    function tick() {
+      const diff = target.getTime() - Date.now();
+      if (diff <= 0) { clearInterval(timer); el.style.display = 'none'; return; }
+      const totalSecs = Math.floor(diff / 1000);
+      dEl.textContent = pad(Math.floor(totalSecs / 86400));
+      hEl.textContent = pad(Math.floor((totalSecs % 86400) / 3600));
+      mEl.textContent = pad(Math.floor((totalSecs % 3600) / 60));
+      sEl.textContent = pad(totalSecs % 60);
+    }
+    el.style.display = 'flex';
+    tick();
+    const timer = setInterval(tick, 1000);
+  }
+
   (async () => {
     try {
       const res = await fetch(API_BASE + '/config');
@@ -176,6 +211,8 @@
       // with nothing set yet.
       if (cfg.headline) document.getElementById('heroHeadline').textContent = cfg.headline;
       if (cfg.subheadline) document.getElementById('heroSub').textContent = cfg.subheadline;
+
+      initCountdown(cfg.launchDate);
 
       if (!cfg.bannerEnabled) return;
       const slot = document.getElementById('sponsorSlot');

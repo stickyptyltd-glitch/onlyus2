@@ -10,31 +10,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F3ECDD; --surface:#FBF6EA; --surface-2:#F0E6D2; --text:#241A2E; --text-muted:#6E6076;
-    --accent:#B34A2A; --accent-ink:#FBF6EA; --border:rgba(36,26,46,0.14); --danger:#A83232; --ok:#4C7A4C;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#16121F; --surface:#221B31; --surface-2:#2A2140; --text:#F4EFFB; --text-muted:#A79BC0;
-      --accent:#DD724A; --accent-ink:#1B1424; --border:rgba(244,239,251,0.14); --danger:#E28080; --ok:#7FBE7F;
-    }
+    --bg:#16121F; --bg-alt:#1F1A2B; --border:#544870;
+    --text-primary:#C9C4D4; --text-muted:#8A8296; --text-dim:#8E7F97;
+    --accent:#A87A67; --accent-dim:#5A5266; --accent-ink:#16121F;
+    --danger:#B0776D; --ok:#6E8F6E;
   }
   *{ box-sizing:border-box; }
-  body{ background:var(--bg); color:var(--text); font-family:'Inter', system-ui, sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  body{ background:var(--bg); color:var(--text-primary); font-family:'Inter', system-ui, sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
   h1,h2{ font-family:'Newsreader', Georgia, serif; font-weight:600; margin:0; }
   .wrap{ max-width:480px; margin:0 auto; padding:30px 20px 60px; }
   .mono{ font-family:'IBM Plex Mono', monospace; }
   label{ display:block; font-size:13px; color:var(--text-muted); margin:16px 0 6px; }
-  input[type=text], input[type=password], textarea{
-    width:100%; background:var(--surface); border:1px solid var(--border); border-radius:9px;
-    padding:11px 12px; font-size:14.5px; color:var(--text); font-family:'Inter', sans-serif; outline:none;
+  input[type=text], input[type=password], input[type=datetime-local], textarea{
+    width:100%; background:var(--bg-alt); border:1px solid var(--border); border-radius:9px;
+    padding:11px 12px; font-size:14.5px; color:var(--text-primary); font-family:'Inter', sans-serif; outline:none;
   }
   textarea{ min-height:80px; resize:vertical; }
   input[type=file]{ width:100%; font-size:13px; }
   button{ font-family:'Inter', sans-serif; cursor:pointer; }
   .primary{ width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:10px; padding:13px; font-size:14.5px; font-weight:600; margin-top:18px; }
-  .secondary{ width:100%; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:10px; padding:11px; font-size:13.5px; margin-top:10px; }
-  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:16px; }
+  .secondary{ width:100%; background:transparent; border:1px solid var(--border); color:var(--text-primary); border-radius:10px; padding:11px; font-size:13.5px; margin-top:10px; }
+  .card{ background:var(--bg-alt); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:16px; }
   .stat-row{ display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-top:1px solid var(--border); }
   .stat-row:first-child{ border-top:none; }
   .stat-num{ font-family:'IBM Plex Mono', monospace; font-size:18px; }
@@ -54,6 +50,14 @@
   // Point this at your deployed Worker.
   const API_BASE = 'https://onlyus2-api.lecheyne24.workers.dev';
   const KEY_STORAGE = 'ou2_admin_key'; // sessionStorage only — cleared when the tab closes
+
+  function isoToLocalInput(iso){
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
 
   const app = document.getElementById('app');
 
@@ -127,6 +131,14 @@
         <p class="note">Changes here update the live landing page immediately — no redeploy, no touching any files. Leave either blank to fall back to what's already written into the page.</p>
       </div>
 
+      <div class="section-label">Launch countdown</div>
+      <div class="card">
+        <label>Launch date &amp; time (your local time)</label>
+        <input type="datetime-local" id="launchDateInput" value="${isoToLocalInput(cfg.launchDate)}">
+        <p class="note">Shows a live countdown on the landing page once set. Leave blank (or use the button below) to hide it — an unset, invalid, or past date always just stays hidden, never shows a broken "0 days left."</p>
+        <button class="secondary" id="clearLaunchDateBtn" type="button">Clear countdown</button>
+      </div>
+
       <div class="section-label">Landing page banner</div>
       <div class="card">
         <div class="toggle-row">
@@ -182,11 +194,16 @@
       pendingImageDataUri = '';
       document.getElementById('imgStatus').textContent = 'Image will be cleared on save.';
     });
+    document.getElementById('clearLaunchDateBtn').addEventListener('click', () => {
+      document.getElementById('launchDateInput').value = '';
+    });
 
     document.getElementById('saveBtn').addEventListener('click', async () => {
+      const launchLocal = document.getElementById('launchDateInput').value;
       const body = {
         headline: document.getElementById('headlineInput').value.trim(),
         subheadline: document.getElementById('subheadlineInput').value.trim(),
+        launchDate: launchLocal ? new Date(launchLocal).toISOString() : '',
         bannerEnabled: document.getElementById('bannerEnabled').checked,
         bannerType: document.querySelector('input[name=bannerType]:checked').value,
         foundingSupporters: document.getElementById('founding').value.split('\n').map(s => s.trim()).filter(Boolean),
